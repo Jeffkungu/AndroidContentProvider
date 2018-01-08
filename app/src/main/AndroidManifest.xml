@@ -16,6 +16,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:authorities="com.sriyank.cpdemo.data.NationProvider"
+            android:name=".data.NationProvider"
+            android:exported="false" />
     </application>
 
 </manifest>

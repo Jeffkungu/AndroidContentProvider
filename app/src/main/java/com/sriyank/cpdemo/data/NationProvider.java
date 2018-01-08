@@ -2,11 +2,13 @@ package com.sriyank.cpdemo.data;
 
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.util.Log;
 
 import static com.sriyank.cpdemo.data.NationContract.CONTENT_AUTHORITY;
 import static com.sriyank.cpdemo.data.NationContract.PATH_COUNTRIES;
@@ -60,6 +62,8 @@ public class NationProvider extends ContentProvider {
 	public Uri insert(Uri uri, ContentValues values) {
 
 		switch (uriMatcher.match(uri)) {
+			case(COUNTRIES):
+				return insertRecord(uri, values, NationContract.NationEntry.TABLE_NAME);
 
 			default:
 				throw new IllegalArgumentException(TAG + "Unknown URI: " + uri);
@@ -68,7 +72,14 @@ public class NationProvider extends ContentProvider {
 
 	private Uri insertRecord(Uri uri, ContentValues values, String tableName) {
 
-		return null;
+		SQLiteDatabase database = databaseHelper.getReadableDatabase();
+		long rowId = database.insert(tableName, null, values);
+
+		if (rowId == -1) {
+			Log.e(TAG, "Insert error for Uri" + uri);
+			return null;
+		}
+		return ContentUris.withAppendedId(uri, rowId);
 	}
 
 	@Override

@@ -3,12 +3,14 @@ package com.sriyank.cpdemo;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.sriyank.cpdemo.data.NationContract.NationEntry;
 import com.sriyank.cpdemo.data.NationDbHelper;
@@ -89,12 +91,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		String countryName 	= etCountry.getText().toString();
 		String continentName= etContinent.getText().toString();
 
-		ContentValues contentValues = new ContentValues();
-		contentValues.put(NationEntry.COLUMN_COUNTRY, countryName);
-		contentValues.put(NationEntry.COLUMN_CONTINENT, continentName);
+		if(countryName != null && continentName != null) {
+			ContentValues contentValues = new ContentValues();
+			contentValues.put(NationEntry.COLUMN_COUNTRY, countryName);
+			contentValues.put(NationEntry.COLUMN_CONTINENT, continentName);
 
-		long rowId = database.insert(NationEntry.TABLE_NAME, null, contentValues);
-		Log.i(TAG, "Items inserted at: " + rowId);
+			Uri uri = NationEntry.CONTENT_URI;
+			Uri uriRowInserted = getContentResolver().insert(uri, contentValues);
+			Log.i(TAG, "Items inserted at" + uriRowInserted);
+		}
+		Toast.makeText(this, "Country and Continent can not be null", Toast.LENGTH_SHORT).show();
 	}
 
 	private void update() {
@@ -102,14 +108,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		String whereCountry = etWhereToUpdate.getText().toString();
 		String newContinent = etNewContinent.getText().toString();
 
-		String selection = NationEntry.COLUMN_COUNTRY + " = ?";
-		String[] selectionArgs = { whereCountry };			// WHERE country = ? = Japan
+		if(whereCountry != null && newContinent != null) {
+			String[] projection = {
+					NationEntry._ID,
+					NationEntry.COLUMN_COUNTRY,
+					NationEntry.COLUMN_CONTINENT
+			};
+			String selection = NationEntry.COLUMN_COUNTRY + " = ?";
+			String[] selectionArgs = { whereCountry };			// WHERE country = ? = Japan
 
-		ContentValues contentValues = new ContentValues();
-		contentValues.put(NationEntry.COLUMN_CONTINENT, newContinent);
+			String sortOrder = null;
+			Cursor cursor = database.query(NationEntry.TABLE_NAME, projection, selection,
+					selectionArgs, null, null, sortOrder);
+			if(cursor != null && cursor.moveToNext()) {
+				ContentValues contentValues = new ContentValues();
+				contentValues.put(NationEntry.COLUMN_CONTINENT, newContinent);
 
-		int rowsUpdated = database.update(NationEntry.TABLE_NAME, contentValues, selection, selectionArgs);
-		Log.i(TAG, "Number of rows updated: " + rowsUpdated);
+				int rowsUpdated = database.update(NationEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+				Log.i(TAG, "Number of rows updated: " + rowsUpdated);
+			}
+			Toast.makeText(this, whereCountry.toString() + " is not in the data base",
+					Toast.LENGTH_SHORT).show();
+		}
+		Toast.makeText(this, "Country and Continent can not be null", Toast.LENGTH_SHORT).show();
 	}
 
 	private void delete() {
@@ -193,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 	@Override
 	protected void onDestroy() {
-		database.close();	// Close Database Connection
+		database.close();	// Close Database Connection when activity is destroyed
 		super.onDestroy();
 	}
 }

@@ -42,15 +42,24 @@ public class NationProvider extends ContentProvider {
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 
 		SQLiteDatabase database = databaseHelper.getReadableDatabase();
-		Cursor cursor = null;
+		Cursor cursor;
 
 		switch (uriMatcher.match(uri)) {
+
+			case COUNTRIES:
+				cursor = database.query(NationContract.NationEntry.TABLE_NAME, projection, selection,
+						selectionArgs, null, null, sortOrder);
+				break;
+			case COUNTRIES_ID:
+				cursor = database.query(NationContract.NationEntry.TABLE_NAME, projection, selection,
+						selectionArgs, null, null, sortOrder);
+				break;
 
 			default:
 				throw new IllegalArgumentException(TAG + "Unknown URI: " + uri);
 		}
 
-//		return cursor;
+		return cursor;
 	}
 
 	@Override

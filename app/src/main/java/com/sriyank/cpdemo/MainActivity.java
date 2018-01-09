@@ -109,26 +109,15 @@ public class  MainActivity extends AppCompatActivity implements View.OnClickList
 		String newContinent = etNewContinent.getText().toString();
 
 		if(whereCountry != null && newContinent != null) {
-			String[] projection = {
-					NationEntry._ID,
-					NationEntry.COLUMN_COUNTRY,
-					NationEntry.COLUMN_CONTINENT
-			};
 			String selection = NationEntry.COLUMN_COUNTRY + " = ?";
 			String[] selectionArgs = { whereCountry };			// WHERE country = ? = Japan
 
-			String sortOrder = null;
-			Cursor cursor = database.query(NationEntry.TABLE_NAME, projection, selection,
-					selectionArgs, null, null, sortOrder);
-			if(cursor != null && cursor.moveToNext()) {
-				ContentValues contentValues = new ContentValues();
-				contentValues.put(NationEntry.COLUMN_CONTINENT, newContinent);
+			ContentValues contentValues = new ContentValues();
+			contentValues.put(NationEntry.COLUMN_CONTINENT, newContinent);
 
-				int rowsUpdated = database.update(NationEntry.TABLE_NAME, contentValues, selection, selectionArgs);
-				Log.i(TAG, "Number of rows updated: " + rowsUpdated);
-			}
-			Toast.makeText(this, whereCountry.toString() + " is not in the data base",
-					Toast.LENGTH_SHORT).show();
+			Uri uri = NationEntry.CONTENT_URI;
+			int rowsUpdated = getContentResolver().update(uri, contentValues, selection, selectionArgs);
+			Log.i(TAG, "Number of rows updated: " + rowsUpdated);
 		}
 		Toast.makeText(this, "Country and Continent can not be null", Toast.LENGTH_SHORT).show();
 	}
@@ -140,7 +129,8 @@ public class  MainActivity extends AppCompatActivity implements View.OnClickList
 		String selection = NationEntry.COLUMN_COUNTRY + " = ? ";
 		String[] selectionArgs = { countryName };		// WHERE country = "Japan"
 
-		int rowsDeleted = database.delete(NationEntry.TABLE_NAME, selection, selectionArgs);
+		Uri uri = Uri.withAppendedPath(NationEntry.CONTENT_URI, countryName);
+		int rowsDeleted = getContentResolver().delete(uri, selection, selectionArgs);
 		Log.i(TAG, "Number of rows deleted: " + rowsDeleted);
 	}
 

@@ -21,7 +21,7 @@ import com.sriyank.cpdemo.data.NationDbHelper;
  *
  *		"BEFORE" project
  * */
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class  MainActivity extends AppCompatActivity implements View.OnClickListener {
 
 	private EditText etCountry, etContinent, etWhereToUpdate, etNewContinent, etWhereToDelete, etQueryRowById;
 	private Button btnInsert, btnUpdate, btnDelete, btnQueryRowById, btnDisplayAll;
@@ -160,8 +160,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 		String sortOrder = null;	// Ascending or Descending ...
 
-		Cursor cursor = database.query(NationEntry.TABLE_NAME, projection, selection,
-										selectionArgs, null, null, sortOrder);
+		Uri uri = Uri.withAppendedPath(NationEntry.CONTENT_URI, rowId);
+		Cursor cursor = getContentResolver().query(uri, projection, selection,
+				selectionArgs, sortOrder);
 
 		if (cursor != null && cursor.moveToNext()) {
 
@@ -192,8 +193,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 		String sortOrder = null;	// Ascending or Descending ...
 
-		Cursor cursor = database.query(NationEntry.TABLE_NAME, projection, selection,
-										selectionArgs, null, null, sortOrder);
+		Uri uri = NationEntry.CONTENT_URI;
+		Cursor cursor = getContentResolver().query(uri, projection, selection,
+				selectionArgs, sortOrder);
 
 		if (cursor != null) {
 

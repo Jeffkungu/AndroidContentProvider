@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 import static com.sriyank.cpdemo.data.NationContract.CONTENT_AUTHORITY;
 import static com.sriyank.cpdemo.data.NationContract.PATH_COUNTRIES;
@@ -71,7 +72,8 @@ public class NationProvider extends ContentProvider {
 	public Uri insert(Uri uri, ContentValues values) {
 
 		switch (uriMatcher.match(uri)) {
-			case(COUNTRIES):
+
+			case COUNTRIES:
 				return insertRecord(uri, values, NationContract.NationEntry.TABLE_NAME);
 
 			default:
@@ -96,13 +98,22 @@ public class NationProvider extends ContentProvider {
 
 		switch (uriMatcher.match(uri)) {
 
+			case COUNTRIES_COUNTRY_NAME:
+				return deleteRecord(selection, selectionArgs, NationContract.NationEntry.TABLE_NAME);
+
 			default:
 				throw new IllegalArgumentException(TAG + "Unknown URI: " + uri);
 		}
 	}
 
 	private int deleteRecord(String selection, String[] selectionArgs, String tableName) {
-		return -1;
+
+		SQLiteDatabase database = databaseHelper.getWritableDatabase();
+
+		int rowsDeleted = database.delete(NationContract.NationEntry.TABLE_NAME, selection, selectionArgs);
+		Log.i(TAG, "Number of rows deleted: " + rowsDeleted);
+
+		return rowsDeleted;
 	}
 
 	@Override
@@ -110,12 +121,32 @@ public class NationProvider extends ContentProvider {
 
 		switch (uriMatcher.match(uri)) {
 
+			case COUNTRIES:
+				return updateRecord(values, selection, selectionArgs, NationContract.NationEntry.TABLE_NAME);
+
 			default:
 				throw new IllegalArgumentException(TAG + "Unknown URI: " + uri);
 		}
 	}
 
 	private int updateRecord(ContentValues values, String selection, String[] selectionArgs, String tableName) {
-		return -1;
+		SQLiteDatabase database = databaseHelper.getWritableDatabase();
+
+		String[] projection = {
+				NationContract.NationEntry._ID,
+				NationContract.NationEntry.COLUMN_COUNTRY,
+				NationContract.NationEntry.COLUMN_CONTINENT
+		};
+		String sortOrder = null;
+		int rowsUpdated = 0;
+
+		Cursor cursor = database.query(NationContract.NationEntry.TABLE_NAME, projection, selection,
+				selectionArgs, null, null, sortOrder);
+		if(cursor != null && cursor.moveToNext()) {
+			rowsUpdated = database.update(tableName, values, selection, selectionArgs);
+		} else {
+			Toast.makeText(this.getContext(), "No such ame in the Database.", Toast.LENGTH_SHORT).show();
+		}
+		return rowsUpdated;
 	}
 }
